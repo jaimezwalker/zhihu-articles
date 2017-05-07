@@ -59,13 +59,74 @@ Prisma 背后的原理其实起源于论文 [Gatys et al, “Image Style Transfe
 
 ![](vgg.jpg)
 
-### L_content
+### 计算内容偏差
 
 要比较两个图片的内容差别，其实就看看他们最高层的特征是否一致就行。例如两个图片都有大桥这个特征，两个图片都有一个人等等共同特征，那么我们通常认为他们是一样内容的。
 
+![](content_loss.jpg)
 
+其中c，x代表内容图片和合成图片，$C_{i,j}^l, X_{i,j}^l$ 分别表示内容图片和合成图片的第l层，第i个特征，第j纬度的值。其实式子也没有分复杂，就是计算了两个向量的欧氏距离。
 
-### L_style
+Tensorflow 代码实现
+
+```
+def create_content_loss(session, model, content_image):
+
+	content_layer_names = ['conv3_1/conv3_1'] # we use the toppest layer for content loss 
+	layers = model.get_layer_tensors(content_layer_names)
+    
+	content_dict = model.create_feed_dict(image=content_image)
+    content_values = session.run(layers, feed_dict= content_dict)
+    
+    content_values = tf.constant(value)
+    stylized_values = layers #laybers will be evaluated during runtime
+
+    with model.graph.as_default():
+        layer_losses = []
+    
+        for v1, v2 in zip(content_values, stylized_values):
+            loss = mean_squared_error(v1, v2)
+            layer_losses.append(loss)
+
+        total_loss = tf.reduce_mean(layer_losses)
+        
+    return total_loss
+```
+### 计算风格偏差
+比较两个图片的风格偏差会稍微复杂一点。如何用数学的式子体现两个内容完全不同的图片，风格一样呢？光光比较他们的特征是不够的，因为一个图里有桥，另一个图里可能没有。因此我们要比较两个图的特征互相之间的关系。这简直是一个天才的想法！我们用Gram Matrix来描述多个特征相互之间的关系，然后来比较两个图的Gram Matrix的距离来衡量风格的相似程度。如果Gram Matrix相近，即特征相互之间的关系相近，那也就说明风格相近。
+
+![](style_loss1.jpg)
+与内容偏差不同，风格偏差与宏观微观的都有关系，所以我们又算出每一层的风格偏差，别求一个加权平均就好了。
+![](style_loss2.jpg)
+
+Tensorflow 代码实现
+
+```
+def create_content_loss(session, model, content_image):
+
+	#we use all 13 conv layers in VGG16 to compute loss function
+	content_layer_names = ['conv1_1/conv1_1', 'conv1_2/conv1_2', 'conv2_1/conv2_1', 'conv2_2/conv2_2', 'conv3_1/conv3_1', 'conv3_2/conv3_2', 'conv3_3/conv3_3', 'conv4_1/conv4_1', 'conv4_2/conv4_2', 'conv4_3/conv4_3', 'conv5_1/conv5_1', 'conv5_2/conv5_2', 'conv5_3/conv5_3'] 
+    layers = model.get_layer_tensors(content_layer_names)
+	gram_layers =gram_matrix(layers)
+    
+	style_dict = model.create_feed_dict(image=style_image)
+    style_values = session.run(gram_layers, feed_dict= style_dict)
+    
+    style_values = tf.constant(style_values)
+    stylized_values = gram_layers #gram_layers will be evaluated during runtime
+
+    with model.graph.as_default():
+        layer_losses = []
+    
+        for v1, v2 in zip(stylized_values, style_values):
+            loss = mean_squared_error(v1, v2)
+            layer_losses.append(loss)
+
+        total_loss = tf.reduce_mean(layer_losses)
+        
+    return total_loss
+```
+
 
 ### 如何最小化？
 
