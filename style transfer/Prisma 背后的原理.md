@@ -70,7 +70,7 @@ Prisma 背后的原理其实起源于论文 [Gatys et al, “Image Style Transfe
 Tensorflow 代码实现
 
 ```
-def create_content_loss(session, model, content_image):
+def create_content_loss(model, content_image):
 
 	content_layer_names = ['conv3_1/conv3_1'] # we use the toppest layer for content loss 
 	layers = model.get_layer_tensors(content_layer_names)
@@ -96,20 +96,31 @@ def create_content_loss(session, model, content_image):
 比较两个图片的风格偏差会稍微复杂一点。如何用数学的式子体现两个内容完全不同的图片，风格一样呢？光光比较他们的特征是不够的，因为一个图里有桥，另一个图里可能没有。因此我们要比较两个图的特征互相之间的关系。这简直是一个天才的想法！我们用Gram Matrix来描述多个特征相互之间的关系，然后来比较两个图的Gram Matrix的距离来衡量风格的相似程度。如果Gram Matrix相近，即特征相互之间的关系相近，那也就说明风格相近。
 
 ![](style_loss1.jpg)
-与内容偏差不同，风格偏差与宏观微观的都有关系，所以我们又算出每一层的风格偏差，别求一个加权平均就好了。
+与内容偏差不同，风格偏差与宏观微观的都有关系，所以我们又算出每一层的风格偏差，再求一个加权平均就好了。
 ![](style_loss2.jpg)
 
 Tensorflow 代码实现
 
 ```
-def create_content_loss(session, model, content_image):
+def gram_matrix(tensor):
+	#gram matrix is just a matrix multiply it's transpose
+    
+    shape = tensor.get_shape()    
+    num_channels = int(shape[3])
+    matrix = tf.reshape(tensor, shape=[-1, num_channels])
+
+    gram = tf.matmul(tf.transpose(matrix), matrix)
+    return gram 
+    
+
+def create_content_loss(model, content_image):
 
 	#we use all 13 conv layers in VGG16 to compute loss function
 	content_layer_names = ['conv1_1/conv1_1', 'conv1_2/conv1_2', 'conv2_1/conv2_1', 'conv2_2/conv2_2', 'conv3_1/conv3_1', 'conv3_2/conv3_2', 'conv3_3/conv3_3', 'conv4_1/conv4_1', 'conv4_2/conv4_2', 'conv4_3/conv4_3', 'conv5_1/conv5_1', 'conv5_2/conv5_2', 'conv5_3/conv5_3'] 
     layers = model.get_layer_tensors(content_layer_names)
-	gram_layers =gram_matrix(layers)
+    gram_layers =gram_matrix(layers)
     
-	style_dict = model.create_feed_dict(image=style_image)
+    style_dict = model.create_feed_dict(image=style_image)
     style_values = session.run(gram_layers, feed_dict= style_dict)
     
     style_values = tf.constant(style_values)
@@ -127,7 +138,88 @@ def create_content_loss(session, model, content_image):
     return total_loss
 ```
 
-
 ### 如何最小化？
+对于一个标准的优化问题，梯度下降（Gradient Descent） 一定是可以用的。我们只需要把三张图片全部输入网络，计算出对应的内容偏差(用最后一层)和风格偏差（用每一层），加权平均一下以后获得总偏差，再相对于合成图片求出梯度，用梯度去更新这个图片就可以了。
 
+![](flowchart.jpg)
+
+```
+def style_transfer(content_image, style_image,
+                   weight_content=1.5, weight_style=10.0,
+                   num_iterations=120, step_size=10.0):
+
+    model = vgg16.VGG16() 
+	 session = tf.InteractiveSession(graph=model.graph)
+
+    loss_content = create_content_loss(content_image, model)
+    loss_style = create_style_loss(style_image, model)   
+    loss_combined = weight_content * loss_content + \
+                    weight_style * loss_style
+
+    gradient_op = tf.gradients(loss_combined, model.input)
+    
+
+    # The mixed-image is initialized with random noise.
+    # It is the same size as the content-image.
+    #where we first init it
+    mixed_image = np.random.rand(*content_image.shape) + 128
+
+    for i in range(num_iterations):
+        # Create a feed-dict with the mixed-image.
+        mixed_dict = model.create_feed_dict(image= mixed_image)
+        
+        #compute the gradient with predefined gradient_op
+        grad = session.run(gradient_op, feed_dict= mixed_dict)
+        grad = np.squeeze(grad)
+        step_size_scaled = step_size / (np.std(grad) + 1e-8)
+
+        #update the mixed_image
+        mixed_image -= grad * step_size_scaled
+        mixed_image = np.clip(mixed_image, 0.0, 255.0)
+
+    session.close()
+    
+    return mixed_image
+```
 ### 效果如何？
+除了稍微慢了一点，效果还是棒棒哒！代码已经提多了，直接上图！
+
+**内容偏差的权重较大时**
+![](style2input.jpg)
+![](style2result.jpg)
+
+**风格偏差的权重较大时**
+![](style7input.jpg)
+![](style7result.jpg)
+
+### 更多的相关研究
+Gatyes后续有发表了一些相关的论文，例如下面这个可以保存内容图片的颜色，只在亮度通道中进行风格转化
+<br>
+[Gatys et al, “Preserving Color in Neural Artistic Style Transfer”, arXiv 2016](https://arxiv.org/abs/1606.05897)
+
+Ruder在视频上进行风格转化，解决了针对不同像素，风格转化不连续的问题
+<br>
+[Ruder et al, “Artistic style transfer for videos”, arXiv 2016](https://arxiv.org/abs/1604.08610)
+
+在特征空间中使用局部匹配来计算风格偏差，效果比使用Gram Matrix更好
+<br>
+[Li and Wand, “Combining Markov Random Fields and Convolutional Neural Networks for Image Synthesis”, CVPR 2016](http://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Li_Combining_Markov_Random_CVPR_2016_paper.pdf)
+
+对于高分辨率图片的快速风格转化
+<br>
+[Johnson et al, “Perceptual Losses for Real-Time Style Transfer and Super-Resolution”, ECCV 2016](https://arxiv.org/abs/1603.08155)
+
+使用同一个网络同时进行多种风格的转化
+<br>
+[Dumoulin et al, “A Learned Representation for Artistic Style”, arXiv 2016](https://arxiv.org/abs/1610.07629)
+
+这个话题现在很火，大家去读个几篇，可能就能有自己的想法了！和女神 Kristen 也指日可待了！
+
+### 参考资料
+[1] Gatys et al, “Image Style Transfer using Convolutional Neural Networks”, CVPR 2016
+
+[2] Stanford CS 20SI: Tensorflow for Deep Learning Research
+
+[3] Convolutional neural networks for artistic style transfer by Harish Narayanan
+
+[4] How to Do Style Transfer with Tensorflow by Siraj Raval
