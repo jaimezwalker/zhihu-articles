@@ -35,12 +35,12 @@ Prisma 背后的原理其实起源于论文 [Gatys et al, “Image Style Transfe
 
 ![](optimization.jpg)
 
-其中c代表content image内容图片，s代表style image风格图片，x代表stylized image合成图片。我们要找到使得整体偏差最小的x作为最后的结果。整体偏差就是内容偏差和风格偏差的加权平均。alpha，beta是两者的权重。希望风格更明显，风格的权重就大一些，希望内容更明显，内容的权重就大一些。
+其中c代表content image内容图片，s代表style image风格图片，x代表stylized image合成图片。我们要找到使得整体偏差最小的x作为最后的结果。整体偏差就是内容偏差和风格偏差的加权平均。 $\alpha$，$\beta$是两者的权重。希望风格更明显，风格的权重就大一些，希望内容更明显，内容的权重就大一些。
 
 现在，有三个问题放在眼前
 
-1. `L_content` 如何定义？ 
-2. `L_style` 如何定义？
+1. $\mathcal{L}_{content}$ 如何定义？ 
+2. $\mathcal{L}_{style}$ 如何定义？
 3. 如何最小化？
 
 我们一个个来搞定
