@@ -76,21 +76,21 @@ p2.xlarge 是一种非常适合深度学习的云服务器，它配备了 12G �
 
 [请求提高限制](https://console.aws.amazon.com/support/home#/case/create?issueType=service-limit-increase&limitType=service-code-ec2-instances)
 
-![](limit increase.png)
+![](limitincrease.png)
 
 不然就会出现可恶的 Instance Count Limit Exceeded 。
 
 ![](limitexceeded.png)
 
-###开启实例
-###选择 AMI
+### 开启实例
+### 选择 AMI
 [EC2控制面板](https://console.aws.amazon.com/ec2/home)
 
 首先点击启动实例，记得Udacity提供的深度学习专用AMI，因为预装了Anaconda, Python2/3, Tensorflow GPU, Keras, OpenCV, Jupyter Notebook，比较省折腾。
 
 ![](AMI.png)
 
-###选择一个实例类型
+### 选择一个实例类型
 
 这里选 p2.xlarge 就好，开启以后一分钟和59分钟都算一个小时，所以开了以后可以放心大胆折腾一个小时，坏了也不用怕，删掉再开一个就好。注意：如果你选择的是 8x 或者 16x，你需要自己实现多 GPU 的代码，不然 Keras 只会使用一个 GPU 来训练。
 
@@ -98,17 +98,18 @@ p2.xlarge 是一种非常适合深度学习的云服务器，它配备了 12G �
 
 后面三步直接下一步就好。
 
-###配置安全组
+### 配置安全组
 按照如下配置，即接受任何位置的ssh访问，以及接受8888端口与任何ip的通讯。要使用ssh是因为我们需要ssh到机器上。要使用8888端口是因为jupyter noteboook的网页端是8888端口。
 
 ![](security.png)
 
-###连接
+### 连接
 ```
 ssh linux@55.55.55.55
 ```
 其中55.55.55.55改成你的aws实例的ip地址。
-###开始写代码
+
+### 开始写代码
 
 你可以通过下面的命令开启一个支持远程连接的 jupyter notebook：
 
