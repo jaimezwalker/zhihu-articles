@@ -4,7 +4,7 @@ Google I/O 第一天上午的 keynote 刚刚结束，我觉得我至少听到了
 
 ![](toai.jpg)
 
-#Google Lens
+## Google Lens
 首当其冲的就是Google Lens
 
 ![](lens.jpg)
@@ -15,7 +15,7 @@ Google Lens可以理解你正在拍摄的场景或以前的照片，**并且给�
 
 最左边的可以识别出花的名字，这个不怎么有趣。中间的可以识别饭店并且给出链接，这个其实就必须要结合饭店的名字和手机的位置，自动去完成搜索，最后给出这个饭店的链接。别觉得这个很简单，要去完成这每一个任务很容易，但是要去知道做正确的事情却很难。最右边的是扫描路由器背后的标签，然后自动连上网络。这个行为如果是在离线的情况完成，也非常的不容易！
 
-#Tensor Processing Unit
+## Tensor Processing Unit
 接下来重点移到了Google自己的硬件 Tensor Processing Units (TPU) 上面。
 
 ![](tpu.jpg)
@@ -28,7 +28,7 @@ Google Lens可以理解你正在拍摄的场景或以前的照片，**并且给�
 
 我突然记得google cloud platform 新用户有300刀credit，啊呀呀，激动不已！
 
-#Google.ai
+## Google.ai
 接着就说到了Google.ai
 ![](googleai.jpg)
 
@@ -49,4 +49,4 @@ Google.AI 会在科研，工具，应用三个方面都有所建树。
 
 ![](godeeper.jpg)
 
-#We need to go deeper
+# We need to go deeper
