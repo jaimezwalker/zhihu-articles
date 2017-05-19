@@ -168,4 +168,6 @@ Training Loss:  1.32 Validation Accuracy: 51.12%
 Time 4.6s
 ```
 
-一行代码都没改，44秒变4秒，学校效率爆表有没有。免费的aws优惠码，还不快试试？
+一行代码都没改，44秒变4秒，学校效率爆表有没有。现在就加入[深度学习纳米学位](https://cn.udacity.com/course/deep-learning-nanodegree-foundation--nd101/?utm_source=aws&utm_medium=referral&utm_campaign=DLND03)，输入 **aws2017** 立即获得300元优惠，并附带100美金aws credit。免费的100美金AWS Credit，还不快试试？
+
+[阅读原文](https://cn.udacity.com/course/deep-learning-nanodegree-foundation--nd101/?utm_source=aws&utm_medium=referral&utm_campaign=DLND03)
