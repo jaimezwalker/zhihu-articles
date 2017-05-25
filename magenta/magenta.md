@@ -26,7 +26,7 @@ Google Brain团队目前正在研究一个项目：Magenta，用深度学习的�
 
 ![](deepwindow.png)
 
-### 项目解析: Sketch-RNN
+### 艺术项目解析: Sketch-RNN
 这篇文章会提到Sketch-Rnn的两个项目，首先第一个叫做 Sketch-RNN，让电脑帮助“灵魂画手”画画。哈哈。其实就是我只要先画几笔，整个程序就可以把剩余的画给画出来。
 
 ![](sketch-RNN.png)
@@ -73,3 +73,13 @@ Google Brain团队目前正在研究一个项目：Magenta，用深度学习的�
 
 还有很多围绕这个项目的有趣例子。例如可以在中间状态z附近随机抽样几个点，然后看解码器能给出什么结果。例如可以在中间状态进行状态运算，然后看解码器会给出什么。
 ![](vector.png)
+
+### 音乐项目体验：AI Duet
+
+这个项目中，我们谈几秒钟钢琴，人工智能能够回复我们一段音乐。里面的技术细节就不说了，和人工智能的来回交流，你想不想体验一下呢？
+
+![](duet.png)
+
+[人工智能对弹 体验](https://aiexperiments.withgoogle.com/ai-duet/view/)
+
+
